@@ -33,19 +33,26 @@ public with sharing class DummyJSONCallout {
 	 * 
      * @param dummyUserId The ID of the user in the external system to fetch data for.
      */
-
+	@future(callout=true)
 	public static void getDummyJSONUserFromId(String dummyUserId) {
+
 		// Create HTTP request to send.
+		HttpRequest request = new HttpRequest();
 
 		// Set the endpoint URL. Use direct URL or for best practices use Named Credential.
+		request.setEndpoint('https://dummyjson.com/users/' + dummyUserId);
 
 		// Set the HTTP method to GET.
+		request.setMethod('GET');
 
 		// Send the HTTP request and get the response.
+		Http http = new Http();
+		HttpResponse response = http.send(request);
 
 		// If the HTTP response code is successful, parse the JSON response and update the contact.
-		Contact cont = null;
-		upsert cont DummyJSON_Id__c; //insert/update from the JSON response using the external id (dummyUserId)
+		if(response.getStatusCode() == 200){
+			DummyJSONCallout.createContactFromJson(response.getBody());
+		}
 	}
 
 	/* 
@@ -65,17 +72,32 @@ public with sharing class DummyJSONCallout {
      */
 	@TestVisible // Allows test class to see this method. Since it is private, it would not be visible otherwise.
 	private static Contact createContactFromJson(String jsonResponse) {
-		// Deserialize the JSON string into map of primitive data types.
-
-		// Create a new contact from the JSON response.
-
-		// Set the contact fields from the JSON response.
+		
+		// Deserialize the JSON string into map of primitive data types
+		Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(jsonResponse);
 
 		// Deserialize the address from the JSON response.
+		Map<String, Object> addressMap = (Map<String, Object>) responseMap.get('address');
+		
+		// Create a new contact from the JSON response
+		Contact newContact = new Contact(
+			// Set the contact fields from the JSON response.
+			DummyJSON_Id__c = String.valueOf(responseMap.get('id')),
+			FirstName = (String) responseMap.get('firstName'),
+			LastName = (String) responseMap.get('lastName'),
+			Email = (String) responseMap.get('email'),
+			Phone = (String) responseMap.get('phone'),
+			Birthdate = Date.parse((String)responseMap.get('birthDate')),
+			// Set the address fields on the contact.
+			MailingStreet = (String) addressMap.get('address'),
+			MailingCity = (String) addressMap.get('city'),
+			MailingPostalCode = (String) addressMap.get('postalCode'),
+			MailingState = (String) addressMap.get('state'),
+			MailingCountry = (String) addressMap.get('country')
+			);
 
-		// Set the address fields on the contact.
-
-		return null;
+			insert newContact;
+		return newContact;
 	}
 
 	/* 

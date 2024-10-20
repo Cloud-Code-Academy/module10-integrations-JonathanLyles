@@ -4,6 +4,7 @@
  */
 @IsTest
 public with sharing class DummyJSONCalloutTest {
+	
 	// This test method will test the getDummyJSONUserFromId future method with a mock HTTP response.
 	@IsTest
 	static void testGetDummyJSONUserFromId() {
