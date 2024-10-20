@@ -75,19 +75,20 @@ public with sharing class DummyJSONCallout {
 		
 		// Deserialize the JSON string into map of primitive data types
 		Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(jsonResponse);
-		Map<String, Object> addressMap = (Map<String, Object>) responseMap.get('address');
 
-		// Create a new contact from the JSON response
-		// Set the contact fields from the JSON response.
 		// Deserialize the address from the JSON response.
-		// Set the address fields on the contact.
+		Map<String, Object> addressMap = (Map<String, Object>) responseMap.get('address');
+		
+		// Create a new contact from the JSON response
 		Contact newContact = new Contact(
+			// Set the contact fields from the JSON response.
 			DummyJSON_Id__c = String.valueOf(responseMap.get('id')),
 			FirstName = (String) responseMap.get('firstName'),
 			LastName = (String) responseMap.get('lastName'),
 			Email = (String) responseMap.get('email'),
 			Phone = (String) responseMap.get('phone'),
 			Birthdate = Date.parse((String)responseMap.get('birthDate')),
+			// Set the address fields on the contact.
 			MailingStreet = (String) addressMap.get('address'),
 			MailingCity = (String) addressMap.get('city'),
 			MailingPostalCode = (String) addressMap.get('postalCode'),
